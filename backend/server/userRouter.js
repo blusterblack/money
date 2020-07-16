@@ -1,42 +1,38 @@
 const express = require('express');
-
-const mongoose = require('mongoose');
-require('dotenv').config();
 const userSchema = require('../schema/userSchema');
-const { createSecurePassword, isMatch } = require('../util/password');
+const UserModel = require('../util/dbConnect')(userSchema, 'user');
+const { isMatch, createSecurePassword } = require('../util/password');
 
-const uri = process.env.URI;
-const connnection = mongoose.createConnection(uri,
-  { useUnifiedTopology: true, useNewUrlParser: true });
-const User = connnection.model('User', userSchema);
-
-function createUser(data) {
-  const { email, password } = data;
+function createUser(reqBody) {
+  const { email, password } = reqBody;
   const { salt, securePassword } = createSecurePassword(password);
-  const user = new User({
-    email, salt, password: securePassword, wallet: [],
+  return new UserModel({
+    email, salt, password: securePassword,
   });
-
-  return user;
 }
-
 const userRouter = express.Router();
 
 userRouter.post('/register', (req, res) => {
-  createUser(req.body).save((err) => {
-    if (err) res.status(400).send('Error');
-    else res.status(200).send('Success');
+  UserModel.findOne({ email: req.body.email }, (err, doc) => {
+    if (doc === null) {
+      createUser(req.body).save((err) => {
+        if (err) res.status(400).send(err);
+        res.status(200).send('Create new account successfully');
+      });
+    } else {
+      res.status(400).send('Email is already registered');
+    }
   });
 });
 
-userRouter.post('/login', (req, resource) => {
+userRouter.post('/login', (req, res) => {
   const { email, password } = req.body;
-  User.findOne({ email }, (err, res) => {
-    if (isMatch(res.salt, password, res.password)) {
-      // eslint-disable-next-line no-underscore-dangle
-      resource.status(200).send(res._id);
+  UserModel.findOne({ email }, (err, doc) => {
+    if (doc === null || !isMatch(doc.salt, password, doc.password)) {
+      res.status(400).send('No match');
     } else {
-      resource.status(400).send('No match');
+      // eslint-disable-next-line no-underscore-dangle
+      res.status(200).send(doc._id);
     }
   });
 });
