@@ -4,13 +4,13 @@ function createSecurePassword(password) {
   const salt = crypto.randomBytes(8).toString('hex');
   const hash = crypto.createHash('sha256');
   hash.update(password + salt);
-  const hashedPassword = hash.digest('hex');
-  return { salt, hashedPassword };
+  const securePassword = hash.digest('hex');
+  return { salt, securePassword };
 }
-function isMatch(salt, password, hashedPassword) {
+function isMatch(salt, password, securePassword) {
   const hash = crypto.createHash('sha256');
   hash.update(password + salt);
-  return hash.digest('hex') === hashedPassword;
+  return hash.digest('hex') === securePassword;
 }
 
 module.exports = { createSecurePassword, isMatch };
