@@ -10,7 +10,7 @@ function createWallet(reqBody) {
 
 walletRouter.post('/:userId', (req, res) => {
   createWallet(req.body).save((err) => {
-    if (err) res.status(400).send('Error: wallet create');
+    if (err) res.status(400).send(err);
     else res.status(200).send('Success wallet create');
   });
 });

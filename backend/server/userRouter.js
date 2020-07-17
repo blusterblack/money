@@ -13,7 +13,7 @@ function createUser(reqBody) {
 const userRouter = express.Router();
 
 userRouter.post('/register', (req, res) => {
-  UserModel.findOne({ email: req.body.email }, (err, doc) => {
+  UserModel.findOne({ email: req.body.email }, (error, doc) => {
     if (doc === null) {
       createUser(req.body).save((err) => {
         if (err) res.status(400).send(err);
@@ -28,6 +28,9 @@ userRouter.post('/register', (req, res) => {
 userRouter.post('/login', (req, res) => {
   const { email, password } = req.body;
   UserModel.findOne({ email }, (err, doc) => {
+    if (err) {
+      res.send(err);
+    }
     if (doc === null || !isMatch(doc.salt, password, doc.password)) {
       res.status(400).send('No match');
     } else {

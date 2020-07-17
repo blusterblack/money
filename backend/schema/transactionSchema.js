@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 const transactionSchema = new Schema({
-  walletID: mongoose.ObjectId,
+  walletId: mongoose.ObjectId,
   category: String,
   detail: String,
   date: Date,
