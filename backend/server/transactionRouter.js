@@ -2,7 +2,7 @@ const express = require('express');
 const transactionSchema = require('../schema/transactionSchema');
 const TransactionModel = require('../util/dbConnect')(transactionSchema, 'transaction');
 const walletSchema = require('../schema/walletSchema');
-const WalletSModel = require('../util/dbConnect')(walletSchema, 'wallet');
+const WalletModel = require('../util/dbConnect')(walletSchema, 'wallet');
 
 function createTransaction(reqBody) {
   const {
@@ -12,23 +12,33 @@ function createTransaction(reqBody) {
     walletId, category, detail, amount, date: Date.now(),
   });
 }
-const transactionRouter = express.Router();
-transactionRouter.post('/:walletId', (req, res) => {
-  createTransaction(req.body).save((error) => {
-    if (error) res.status(400).send(error);
-    const { walletId } = req.params;
-    WalletSModel.findById(walletId, (err, doc) => {
-      WalletSModel.findByIdAndUpdate(walletId, { balance: doc.balance - req.body.amount }, (err1, doc1) => { res.send(doc1); });
-    });
-  });
-});
 
-transactionRouter.get('/:walletId', (req, res) => {
+async function saveTransaction(req, res) {
   const { walletId } = req.params;
+  try {
+    const wallet = await WalletModel.findById(walletId);
+    if (wallet === null) {
+      throw new Error('No such wallet');
+    }
+    const newTransaction = await createTransaction(req.body).save();
+    await WalletModel.findByIdAndUpdate(walletId,
+      { balance: wallet.balance - req.body.amount });
+    res.status(200).send(newTransaction);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+}
+async function getTransaction(req, res) {
+  const { walletId } = req.params;
+  try {
+    const transaction = await TransactionModel.find({ walletId });
+    res.status(200).send(transaction);
+  } catch (err) {
+    res.status.send(err);
+  }
+}
 
-  TransactionModel.find({ walletId }, (err, doc) => {
-    res.send(doc);
-  });
-});
-
+const transactionRouter = express.Router();
+transactionRouter.get('/:walletId', getTransaction);
+transactionRouter.post('/:walletId', saveTransaction);
 module.exports = transactionRouter;

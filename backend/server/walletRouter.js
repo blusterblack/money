@@ -1,25 +1,37 @@
 const express = require('express');
 const walletSchema = require('../schema/walletSchema');
-const WalletSModel = require('../util/dbConnect')(walletSchema, 'wallet');
+const WalletModel = require('../util/dbConnect')(walletSchema, 'wallet');
 
 const walletRouter = express.Router();
 function createWallet(reqBody) {
   const { name, balance, userId } = reqBody;
-  return new WalletSModel({ name, balance, userId });
+  return new WalletModel({ name, balance, userId });
 }
 
-walletRouter.post('/:userId', (req, res) => {
-  createWallet(req.body).save((err) => {
-    if (err) res.status(400).send(err);
-    else res.status(200).send('Success wallet create');
-  });
-});
-
-walletRouter.get('/:userId', (req, res) => {
+async function saveWallet(req, res) {
+  const { name, userId } = req.body;
+  const existWallet = await WalletModel.findOne({ name, userId });
+  if (existWallet !== null) {
+    res.status(409).send('Duplicated wallet name');
+  } else {
+    try {
+      const newWallet = await createWallet(req.body).save();
+      res.status(200).send(newWallet);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  }
+}
+async function getWallet(req, res) {
   const { userId } = req.params;
-  WalletSModel.find({ userId }, 'name balance _id', (err, doc) => {
-    res.send(doc);
-  });
-});
+  try {
+    const wallet = WalletModel.find({ userId }, 'name balance _id');
+    res.send(wallet);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+}
+walletRouter.post('/:userId', saveWallet);
+walletRouter.get('/:userId', getWallet);
 
 module.exports = walletRouter;

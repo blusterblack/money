@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon backend/server/server.js",
-    "build": 	"webpack --mode development",
-    "start":"webpack-dev-server --mode development",
-    "lint":"npx eslint"
+    "build": "webpack --mode development",
+    "start": "webpack-dev-server --mode development",
+    "lint": "npx eslint"
   },
   "keywords": [],
   "author": "",
