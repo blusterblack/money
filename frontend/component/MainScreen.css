@@ -1,0 +1,13 @@
+#MainScreen{
+  display: flex;
+  flex-direction: column;
+}
+#NavBar{
+  flex-basis: 10vh;
+}
+#TopBar{
+  flex-basis: 10vh;
+}
+#Main{
+  flex-basis: 80vh;
+}

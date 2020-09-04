@@ -1,10 +1,11 @@
 import React from 'react';
 import { hot } from 'react-hot-loader';
+import MainScreen from './MainScreen';
 
 function App() {
   return (
     <div className="App">
-      <h1> Hello World! </h1>
+      <MainScreen />
     </div>
   );
 }
