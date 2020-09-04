@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './fronend/index.js',
+  entry: './frontend/index.js',
   mode: 'development',
   module: {
     rules: [
