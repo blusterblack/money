@@ -1,7 +1,6 @@
 import React from 'react';
 import TopBar from './TopBar';
 import NavBar from './NavBar';
-import './MainScreen.css';
 import Item from './Item';
 
 const testItem = { category: 'food', amount: 1000, detail: 'abcxyz' };
